@@ -145,13 +145,26 @@ def evaluate_rules(reading, rules):
     return "NO_RULE_FIRED", "CONTINUE_NORMAL"
 
 
+
 # ---------------------------------------------------------------------------
 # STEP 4 — Trigger an action when a rule fires
 # ---------------------------------------------------------------------------
 def take_action(action):
     """Return a human-readable string describing what happens for this action."""
-    # TODO: map action names (e.g. "STOP_MACHINE") to a message
-    return f"(no handler yet for action: {action})"
+
+    if action == "STOP_MACHINE":
+        return "Machine stopped due to a critical condition."
+    elif action == "RAISE_ALERT":
+        return "ALERT: Immediate attention required!"
+    elif action == "RAISE_WARNING":
+        return "WARNING: Check the machine condition."
+    elif action == "CONTINUE_NORMAL":
+        return "Machine operating normally."
+    elif action == "FLAG_MISSING_DATA":
+        return "SENSOR DROPOUT: Missing sensor data detected."
+    else:
+        return f"(no handler yet for action: {action})"
+
 
 
 # ---------------------------------------------------------------------------
