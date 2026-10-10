@@ -1,3 +1,4 @@
+
 """
 DAY 1 · HANDS-ON — Build Your Rule Engine
 23IF02 System Automation
@@ -23,15 +24,22 @@ LOG_FILE = "day1_log.txt"
 def generate_sensor_data():
     """Return a dict with at least 'temperature', 'pressure', 'vibration'."""
     # TODO: fill in realistic random values, e.g. temperature 50-95 (deg C)
-    return {
-        "temperature": random.randint(50, 95),   # TODO
-        "pressure": round(random.uniform(20, 50), 2),      # TODO
-        "vibration": round(random.uniform(0, 1), 2),     # TODO
+    reading = {
+        "temperature": random.randint(50, 95),
+        "pressure": round(random.uniform(20, 50), 2),
+        "vibration": round(random.uniform(0, 1), 2),
+        "current": round(random.uniform(5, 120), 2),
     }
+
     # STRETCH GOAL (after the 8 steps below all work): real sensors aren't
     # perfectly clean. Try making one field randomly return None (a
     # dropout) or spike far outside its normal range every so often, then
     # update evaluate_rules() so a dropout doesn't crash your engine.
+    if random.random() < 0.05:
+        sensor = random.choice(list(reading.keys()))
+        reading[sensor] = None
+
+    return reading
 
 
 # ---------------------------------------------------------------------------
@@ -39,19 +47,19 @@ def generate_sensor_data():
 # STEP 7 — Add a rule of your own (add another dict to this list)
 # STEP 8 — Add one priority rule (lower "priority" number checked first)
 # ---------------------------------------------------------------------------
-  
+
 RULES = [
     # Critical conditions
     {
-        "name": "HIGH_TEMP",
+        "name": "CRITICAL_TEMP",
         "priority": 1,
-        "condition": lambda r: r["temperature"] > 80,
+        "condition": lambda r: r["temperature"] > 90,
         "action": "STOP_MACHINE"
     },
     {
-        "name": "CRITICAL_TEMP",
+        "name": "HIGH_TEMP",
         "priority": 2,
-        "condition": lambda r: r["temperature"] > 90,
+        "condition": lambda r: r["temperature"] > 80,
         "action": "STOP_MACHINE"
     },
     {
@@ -72,37 +80,49 @@ RULES = [
         "condition": lambda r: r["vibration"] > 0.8,
         "action": "STOP_MACHINE"
     },
+    {
+        "name": "CURRENT_SPIKE",
+        "priority": 6,
+        "condition": lambda r: r["current"] > 100,
+        "action": "STOP_MACHINE"
+    },
 
     # Warning conditions
     {
         "name": "TEMP_WARNING",
-        "priority": 6,
+        "priority": 7,
         "condition": lambda r: r["temperature"] > 70,
         "action": "RAISE_WARNING"
     },
     {
         "name": "PRESSURE_WARNING",
-        "priority": 7,
+        "priority": 8,
         "condition": lambda r: r["pressure"] > 40,
         "action": "RAISE_WARNING"
     },
     {
         "name": "VIBRATION_WARNING",
-        "priority": 8,
+        "priority": 9,
         "condition": lambda r: r["vibration"] > 0.5,
+        "action": "RAISE_WARNING"
+    },
+    {
+        "name": "CURRENT_WARNING",
+        "priority": 10,
+        "condition": lambda r: r["current"] > 80,
         "action": "RAISE_WARNING"
     },
 
     # Alert conditions
     {
         "name": "LOW_TEMP_ALERT",
-        "priority": 9,
-        "condition": lambda r: r["temperature"] < 50,
+        "priority": 11,
+        "condition": lambda r: r["temperature"] < 55,
         "action": "RAISE_ALERT"
     },
     {
         "name": "LOW_VIBRATION_ALERT",
-        "priority": 10,
+        "priority": 12,
         "condition": lambda r: r["vibration"] < 0.1,
         "action": "RAISE_ALERT"
     }
@@ -118,7 +138,7 @@ def evaluate_rules(reading, rules):
     ("NO_RULE_FIRED", "CONTINUE_NORMAL")."""
 
     # Check if any sensor data is missing
-    required_sensors = ["temperature", "pressure", "vibration"]
+    required_sensors = ["temperature", "pressure", "vibration", "current"]
 
     missing = [
         sensor for sensor in required_sensors
@@ -145,7 +165,6 @@ def evaluate_rules(reading, rules):
     return "NO_RULE_FIRED", "CONTINUE_NORMAL"
 
 
-
 # ---------------------------------------------------------------------------
 # STEP 4 — Trigger an action when a rule fires
 # ---------------------------------------------------------------------------
@@ -153,7 +172,7 @@ def take_action(action):
     """Return a human-readable string describing what happens for this action."""
 
     if action == "STOP_MACHINE":
-        return "Machine stopped due to a critical condition."
+        return "Machine stop requested due to a critical condition."
     elif action == "RAISE_ALERT":
         return "ALERT: Immediate attention required!"
     elif action == "RAISE_WARNING":
@@ -166,14 +185,21 @@ def take_action(action):
         return f"(no handler yet for action: {action})"
 
 
-
 # ---------------------------------------------------------------------------
 # STEP 5 — Log every decision made
 # ---------------------------------------------------------------------------
 def log_decision(reading, rule_name, action):
     """Append one line to LOG_FILE with the reading, rule fired, and action."""
-    # TODO: open(LOG_FILE, "a") and write a line
-    pass
+
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+
+    with open(LOG_FILE, "a", encoding="utf-8") as file:
+        file.write(
+            f"Time: {timestamp} | "
+            f"Reading: {reading} | "
+            f"Rule: {rule_name} | "
+            f"Action: {action}\n"
+        )
 
 
 # ---------------------------------------------------------------------------
