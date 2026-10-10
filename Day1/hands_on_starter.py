@@ -72,55 +72,41 @@ RULES = [
         "condition": lambda r: r["vibration"] > 0.8,
         "action": "STOP_MACHINE"
     },
-    {
-        "name": "CURRENT_SPIKE",
-        "priority": 6,
-        "condition": lambda r: r["current"] > 100,
-        "action": "STOP_MACHINE"
-    },
 
     # Warning conditions
     {
         "name": "TEMP_WARNING",
-        "priority": 7,
+        "priority": 6,
         "condition": lambda r: r["temperature"] > 70,
         "action": "RAISE_WARNING"
     },
     {
         "name": "PRESSURE_WARNING",
-        "priority": 8,
+        "priority": 7,
         "condition": lambda r: r["pressure"] > 40,
         "action": "RAISE_WARNING"
     },
     {
         "name": "VIBRATION_WARNING",
-        "priority": 9,
+        "priority": 8,
         "condition": lambda r: r["vibration"] > 0.5,
-        "action": "RAISE_WARNING"
-    },
-    {
-        "name": "CURRENT_WARNING",
-        "priority": 10,
-        "condition": lambda r: r["current"] > 80,
         "action": "RAISE_WARNING"
     },
 
     # Alert conditions
     {
         "name": "LOW_TEMP_ALERT",
-        "priority": 11,
+        "priority": 9,
         "condition": lambda r: r["temperature"] < 50,
         "action": "RAISE_ALERT"
     },
     {
         "name": "LOW_VIBRATION_ALERT",
-        "priority": 12,
+        "priority": 10,
         "condition": lambda r: r["vibration"] < 0.1,
         "action": "RAISE_ALERT"
     }
 ]
-
-
 
 
 # ---------------------------------------------------------------------------
@@ -130,7 +116,32 @@ def evaluate_rules(reading, rules):
     """Return (rule_name, action) for the first matching rule, checked in
     priority order (lowest number first). If nothing matches, return
     ("NO_RULE_FIRED", "CONTINUE_NORMAL")."""
+
+    # Check if any sensor data is missing
+    required_sensors = ["temperature", "pressure", "vibration"]
+
+    missing = [
+        sensor for sensor in required_sensors
+        if sensor not in reading or reading[sensor] is None
+    ]
+
+    # If any value is missing, flag the sensor dropout
+    if missing:
+        return (
+            "SENSOR_DROPOUT: " + ", ".join(missing),
+            "FLAG_MISSING_DATA"
+        )
+
     # TODO: sort `rules` by priority, then check each rule's condition(reading)
+    # Lower priority number means the rule is checked first
+    sorted_rules = sorted(rules, key=lambda rule: rule["priority"])
+
+    # Check each rule in priority order
+    for rule in sorted_rules:
+        if rule["condition"](reading):
+            return rule["name"], rule["action"]
+
+    # If no rule matches, continue normal operation
     return "NO_RULE_FIRED", "CONTINUE_NORMAL"
 
 
