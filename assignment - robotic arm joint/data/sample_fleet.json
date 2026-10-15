@@ -1,0 +1,166 @@
+{
+  "_comment": "Demo fleet. Units: torque N*m, temperature deg C, vibration mm/s RMS.",
+  "arms": [
+    {
+      "arm_id": "ARM-01",
+      "expected": "SAFE",
+      "scenario": "Healthy arm; irrelevant/negated maintenance note only.",
+      "readings": {
+        "shoulder": {
+          "torque": 55,
+          "temperature": 47,
+          "vibration": 1.6
+        },
+        "elbow": {
+          "torque": 38,
+          "temperature": 50,
+          "vibration": 1.9
+        },
+        "wrist": {
+          "torque": 14,
+          "temperature": 46,
+          "vibration": 1.4
+        }
+      }
+    },
+    {
+      "arm_id": "ARM-02",
+      "expected": "MONITOR",
+      "scenario": "Healthy sensors but technician noted wrist vibration.",
+      "readings": {
+        "shoulder": {
+          "torque": 58,
+          "temperature": 49,
+          "vibration": 1.8
+        },
+        "elbow": {
+          "torque": 36,
+          "temperature": 48,
+          "vibration": 1.7
+        },
+        "wrist": {
+          "torque": 13,
+          "temperature": 50,
+          "vibration": 2.2
+        }
+      }
+    },
+    {
+      "arm_id": "ARM-03",
+      "expected": "SCHEDULE_MAINTENANCE",
+      "scenario": "Elbow wear prediction agrees with grinding/heat maintenance notes.",
+      "readings": {
+        "shoulder": {
+          "torque": 60,
+          "temperature": 50,
+          "vibration": 1.9
+        },
+        "elbow": {
+          "torque": 56,
+          "temperature": 66,
+          "vibration": 4.6
+        },
+        "wrist": {
+          "torque": 12,
+          "temperature": 47,
+          "vibration": 1.5
+        }
+      }
+    },
+    {
+      "arm_id": "ARM-04",
+      "expected": "EMERGENCY_STOP",
+      "scenario": "Shoulder temperature crosses the hard emergency limit.",
+      "readings": {
+        "shoulder": {
+          "torque": 75,
+          "temperature": 91,
+          "vibration": 2.4
+        },
+        "elbow": {
+          "torque": 40,
+          "temperature": 52,
+          "vibration": 2.0
+        },
+        "wrist": {
+          "torque": 15,
+          "temperature": 48,
+          "vibration": 1.6
+        }
+      }
+    },
+    {
+      "arm_id": "ARM-05",
+      "expected": "EMERGENCY_STOP",
+      "scenario": "Torque spoof: reported torque is low while elbow is hot and vibrating.",
+      "readings": {
+        "shoulder": {
+          "torque": 57,
+          "temperature": 51,
+          "vibration": 1.8
+        },
+        "elbow": {
+          "torque": 3,
+          "temperature": 72,
+          "vibration": 6.5
+        },
+        "wrist": {
+          "torque": 13,
+          "temperature": 47,
+          "vibration": 1.5
+        }
+      },
+      "previous": {
+        "elbow": {
+          "torque": 52,
+          "temperature": 69,
+          "vibration": 5.9
+        }
+      }
+    },
+    {
+      "arm_id": "ARM-06",
+      "expected": "MONITOR",
+      "scenario": "ML predicts early elbow wear; no maintenance note.",
+      "readings": {
+        "shoulder": {
+          "torque": 56,
+          "temperature": 48,
+          "vibration": 1.7
+        },
+        "elbow": {
+          "torque": 52,
+          "temperature": 63,
+          "vibration": 4.0
+        },
+        "wrist": {
+          "torque": 12,
+          "temperature": 46,
+          "vibration": 1.4
+        }
+      }
+    },
+    {
+      "arm_id": "ARM-07",
+      "expected": "SCHEDULE_MAINTENANCE",
+      "scenario": "Wrist torque sensor is missing; system refuses to silently ignore it.",
+      "readings": {
+        "shoulder": {
+          "torque": 54,
+          "temperature": 47,
+          "vibration": 1.6
+        },
+        "elbow": {
+          "torque": 37,
+          "temperature": 49,
+          "vibration": 1.8
+        },
+        "wrist": {
+          "torque": null,
+          "temperature": 46,
+          "vibration": 1.4
+        }
+      }
+    }
+  ]
+}
